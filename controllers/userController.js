@@ -49,3 +49,34 @@ exports.getUserbyId = async (req, res) => {
     });
   }
 };
+
+exports.UpdateUser = async (req, res) => {
+  try {
+    const Newuser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    res.status(200).json({
+      message: "User Updated !!!",
+      data: Newuser,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Fail !!!",
+      error: error,
+    });
+  }
+};
+
+exports.DeleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(203).json({
+      message: "User Deleted !!!",
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Fail !!!",
+      error: error,
+    });
+  }
+};
