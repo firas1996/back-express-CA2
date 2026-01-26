@@ -14,7 +14,7 @@ mongoose
 const port = 1122;
 const app = express();
 app.use(express.json());
-app.use("users", userRoutes);
+app.use("/users", userRoutes);
 
 app.listen(port, () => {
   console.log("The server is running !!!");
