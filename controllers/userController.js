@@ -1,13 +1,53 @@
 const User = require("../models/userModel");
+const bcrypt = require("bcryptjs");
 
 // Create a user
 
 exports.createUser = async (req, res) => {
   try {
-    const newUser = await User.create(req.body);
+    const { name, email, password, confirm_pass, role } = req.body;
+    const newUser = await User.create({
+      name,
+      email,
+      password,
+      confirm_pass,
+      // role: role === "admin" ? "user" : role,
+    });
     res.status(201).json({
       message: "User Created !!!",
       data: newUser,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "Fail !!!",
+      error: error,
+    });
+  }
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).json({
+        message: "Email and password are required !!!",
+      });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(400).json({
+        message: "User does not exist !!!",
+      });
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      res.status(400).json({
+        message: "Incorrect Password !!!",
+      });
+    }
+
+    res.status(200).json({
+      message: "Logged in !!!!",
     });
   } catch (error) {
     res.status(400).json({
