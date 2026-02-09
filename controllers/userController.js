@@ -1,5 +1,12 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const createToken = (id, name) => {
+  return jwt.sign({ id, name, test: "hello" }, process.env.SECRET_KEY, {
+    expiresIn: "30d",
+  });
+};
 
 // Create a user
 
@@ -46,8 +53,11 @@ exports.login = async (req, res) => {
       });
     }
 
+    const token = createToken(user._id, user.name);
+
     res.status(200).json({
       message: "Logged in !!!!",
+      token: token,
     });
   } catch (error) {
     res.status(400).json({
