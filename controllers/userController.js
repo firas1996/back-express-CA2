@@ -1,11 +1,47 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { promisify } = require("util");
 
 const createToken = (id, name) => {
   return jwt.sign({ id, name, test: "hello" }, process.env.SECRET_KEY, {
     expiresIn: "30d",
   });
+};
+
+exports.protectorMW = async (req, res, next) => {
+  try {
+    let token;
+    // 1) bech t'thabat ken el user 3andou token ou bien non !
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    if (!token) {
+      res.status(401).json({
+        message: "You are not logged in !!!",
+      });
+    }
+    // 2) nthabat si el token valid or not !!!!
+    const verified = await promisify(jwt.verify)(token, process.env.SECRET_KEY);
+    console.log(verified);
+    // 3) thabat ken moula el token mizel mawjoud wala tfasa5 !!!
+    const theUser = await User.findById(verified.id);
+    if (!theUser) {
+      res.status(404).json({
+        message: "User no longer exist !!!",
+      });
+    }
+    // 4) thabat si el token tsan3et 9bal wala ba3d e5er password update !!!
+    next();
+  } catch (error) {
+    res.status(400).json({
+      message: "Fail !!!",
+      error: error,
+    });
+  }
 };
 
 // Create a user
